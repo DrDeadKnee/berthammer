@@ -35,6 +35,8 @@ def fetch_html(url, dataname="unknown"):
             .replace("</b>", " </b>")
             .replace("</div>", " </div>")
             .replace("</li>", " </li>")
+            .replace("</p>", " </p>")
+            .replace("</td>", " </td>")
     )
     with open(os.path.join(rawout, dataname) + ".html", "w") as fout:
         fout.write(rawish_content)
