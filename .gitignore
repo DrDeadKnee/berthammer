@@ -1,0 +1,9 @@
+*.csv
+*.parquet
+*.gz
+*.swo
+*.swp
+*.pyc
+*.html
+*.txt
+__pycache__
