@@ -3,16 +3,11 @@ import requests
 from bs4 import BeautifulSoup as BS
 
 
-def fetch_remote(url, dataname):
+def fetch_html(url, dataname="unknown"):
     """
-    Function to fetch remote code and parse into
-    dataset-freindly text.
-
-    Stores html as 'raw' data, although some string
-    replacement is done beforehand to allow bs4 text
-    rendering to work properly. Then loops through
-    all 'Columns2' sections to grab the rules, and writes
-    each sentence seperately to a processed text file.
+    Function to fetch and store html as 'raw' data, although
+    some string replacement is done beforehand to allow bs4 text
+    rendering to work properly.
 
     args:
         url (string):       The site to scrape. This code assumes
@@ -22,14 +17,11 @@ def fetch_remote(url, dataname):
                             stored under the data directory.
 
     returns:
-        allrules (list[string]): List of all sentences from original code
+        raw_content (string): Long string of minimally processed html
     """
     # Prep paths to write
     rawout = os.path.join("data", "raw")
-    textout = os.path.join("data", "text")
-
     if not os.path.isdir(rawout): os.makedirs(rawout)
-    if not os.path.isdir(textout): os.makedirs(textout)
 
     # Scrape and minimaly reformat
     raw_content = requests.get(url).text
@@ -42,15 +34,40 @@ def fetch_remote(url, dataname):
         fout.write(raw_content)
     fout.close()
 
+    return raw_content
+
+
+def extract_sentences(raw_content, dataname="unknown"):
+    """
+    Parse raw html into dataset-freindly sentences using bs4
+    text extraction. Then loops through all text to infer sentence chunks,
+    and writes each sentence seperately to a processed text file.
+
+    args:
+        raw_content (string): A long string containing the web page's
+                              content as 'raw' html.
+        dataname (string):  A short string representing the desired
+                            output name. Files with that name will be
+                            stored under the data directory.
+
+    returns:
+        allrules (list[string]): List of all sentences from original code
+    """
+
+    # Prep paths to write
+    textout = os.path.join("data", "text")
+    if not os.path.isdir(textout): os.makedirs(textout)
+
     # Parse html with beautifulsoup
     soup = BS(raw_content, "html.parser")
     content = soup.find_all("div", class_="Columns2")
 
+    # Loop over sections, inferring sentence ends
     allrules = []
     for section in content:
         allrules += get_sentences(section.text)
 
-    with open(os.path.joint(textout, dataname) + ".txt", "w") as fout:
+    with open(os.path.join(textout, dataname) + ".txt", "w") as fout:
         for sentence in allrules:
             fout.write(sentence + "\n")
     fout.close()
@@ -82,9 +99,3 @@ def get_sentences(textblock):
                 sentence_start = i + 1
         i += 1
     return sentences
-
-
-if __name__ == "__main__":
-    url = "https://wahapedia.ru/aos3/the-rules/the-core-rules/"
-    dataname = "core"
-    rules = fetch_remote(url, dataname)
