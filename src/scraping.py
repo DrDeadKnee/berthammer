@@ -33,10 +33,12 @@ def fetch_html(url, dataname="unknown"):
             .replace("</h4>", ". </h4>")
             .replace("</a>", " </a>")
             .replace("</b>", " </b>")
+            .replace("<br>", ". <br>")
             .replace("</div>", " </div>")
             .replace("</li>", " </li>")
             .replace("</p>", " </p>")
             .replace("</td>", " </td>")
+            .replace("</span>", " </span>")
     )
     with open(os.path.join(rawout, dataname) + ".html", "w") as fout:
         fout.write(rawish_content)
@@ -68,7 +70,9 @@ def extract_sentences(raw_content, dataname="unknown"):
 
     # Parse html with beautifulsoup
     soup = BS(raw_content, "html.parser")
-    content = soup.find_all("div", class_=["Columns1", "Columns2", "Columns3"])
+    content = soup.find_all("div", class_=[
+        "Columns1", "Columns2", "Columns3", "datasheet pagebreak"
+    ])
 
     # Loop over sections, inferring sentence ends
     allrules = []
@@ -99,7 +103,7 @@ def get_sentences(textblock):
 
     sentence_start, i = 0, 1
     while i < len(textblock) - 1:
-        if textblock[i] in [".", "!", "?", ":"]:
+        if textblock[i] in [".", "!", "?"]:
             c1 = textblock[i - 1].isdigit()
             c2 = textblock[i + 1].isdigit()
             if not (c1 and c2):

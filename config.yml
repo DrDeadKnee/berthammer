@@ -3,3 +3,5 @@ page_ids:
       url: https://wahapedia.ru/aos3/the-rules/the-core-rules/ 
     - id: sbgl
       url: https://wahapedia.ru/aos3/factions/soulblight-gravelords/
+    - id: sbgl_ws
+      url: https://wahapedia.ru/aos3/factions/soulblight-gravelords/warscrolls.html
