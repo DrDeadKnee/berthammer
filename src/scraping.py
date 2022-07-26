@@ -25,18 +25,22 @@ def fetch_html(url, dataname="unknown"):
 
     # Scrape and minimaly reformat
     raw_content = requests.get(url).text
-    raw_content = (raw_content
-                   .replace("</h1>", ". </h1>")
-                   .replace("</h2>", ". </h2>")
-                   .replace("</h3>", ". </h3>")
-                   .replace("</h4>", ". </h4>")
-                   .replace("</a>", " </a>")
-                   .replace("</b>", " </b>"))
+    rawish_content = (
+        raw_content
+            .replace("</h1>", ". </h1>")
+            .replace("</h2>", ". </h2>")
+            .replace("</h3>", ". </h3>")
+            .replace("</h4>", ". </h4>")
+            .replace("</a>", " </a>")
+            .replace("</b>", " </b>")
+            .replace("</div>", " </div>")
+            .replace("</li>", " </li>")
+    )
     with open(os.path.join(rawout, dataname) + ".html", "w") as fout:
-        fout.write(raw_content)
+        fout.write(rawish_content)
     fout.close()
 
-    return raw_content
+    return rawish_content
 
 
 def extract_sentences(raw_content, dataname="unknown"):
@@ -62,7 +66,7 @@ def extract_sentences(raw_content, dataname="unknown"):
 
     # Parse html with beautifulsoup
     soup = BS(raw_content, "html.parser")
-    content = soup.find_all("div", class_=["Columns2", "Columns3"])
+    content = soup.find_all("div", class_=["Columns1", "Columns2", "Columns3"])
 
     # Loop over sections, inferring sentence ends
     allrules = []
