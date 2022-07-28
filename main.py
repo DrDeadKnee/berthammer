@@ -46,76 +46,6 @@ class Main():
                 ui.keepon(f"\nany key for the next {lines} lines\n>")
 
 
-def parse_ws_table(table):
-    mytable = []
-    for row in table.find_all("tr", class_=["wsHeaderRow", "wsDataRow"]):
-        new_row = []
-        for column in row.find_all("td"):
-            txt = column.text.strip()
-            new_row.append(txt)
-        if len(new_row) > 3:
-            mytable.append(new_row)
-
-    return mytable
-
-
-def parse_ws_table2(table):
-    mytable = []
-
-    for row in table.find_all("tr", class_=["wsHeaderRow", "wsDataRow"]):
-        print("\n\n------\n")
-        print(row)
-        if "wsHeaderRow" in row.attrs["class"]:
-            headers = [str(i.text).strip() for i in row.find_all("td")]
-            print("\nt1\n")
-        elif (("wsDataRow" in row.attrs["class"]) and
-              ("wsDataCell_short" not in row.attrs["class"])):
-
-            print("\nt2\n")
-            new_row = {}
-            raw_elements = row.find_all("td", class_=["wsDataCell", "wsLastDataCell"])
-
-            print(" - ".join([str(i) for i in raw_elements]))
-            for i in range(len(raw_elements)):
-                new_row[headers[i]] = str(raw_elements[i].text).strip()
-            mytable.append(new_row)
-
-        print(f"\n{mytable}\n")
-
-    return mytable
-
-
-def encode_ws_table(table):
-    df = pd.DataFrame()
-    columns = [
-        "weapon_name",
-        "range",
-        "attacks",
-        "to_hit",
-        "to_wound",
-        "rend",
-        "damage"
-    ]
-    badrows = []
-
-    missile = False
-    for row in table:
-        if row[0] == "MISSILE WEAPONS":
-            missile = True
-        elif row[0] == "MELEE WEAPONS":
-            missile = False
-        else:
-            try:
-                newrow = dict(zip(columns, row))
-            except IndexError:
-                badrows.append(row)
-
-            newrow["weapon_type"] = {False: "melee", True: "missile"}[missile]
-            df = df.append(newrow, ignore_index=True)
-
-    return df, badrows
-
-
 if __name__ == "__main__":
     M = Main()
     M.scrape_all()
@@ -127,6 +57,4 @@ if __name__ == "__main__":
     ws = ws_list[0]
     tables = ws.find_all("table")
     tab = tables[0]
-    df = parse_ws_table2(tab)
-    # df = parse_ws_table(tab)
-    # df2, badrows = encode_ws_table(df)
+    df = scraping.parse_ws_table(tab)

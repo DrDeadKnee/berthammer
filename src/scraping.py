@@ -11,7 +11,7 @@ def fetch_html(url, dataname="unknown"):
 
     args:
         url (string):       The site to scrape. This code assumes
-                            a standard 2-column wahapedia page.
+                            a standard 3-column wahapedia page.
         dataname (string):  A short string representing the desired
                             output name. Files with that name will be
                             stored under the data directory.
@@ -21,7 +21,8 @@ def fetch_html(url, dataname="unknown"):
     """
     # Prep paths to write
     rawout = os.path.join("data", "raw")
-    if not os.path.isdir(rawout): os.makedirs(rawout)
+    if not os.path.isdir(rawout):
+        os.makedirs(rawout)
 
     # Scrape and minimaly reformat
     raw_content = requests.get(url).text
@@ -66,7 +67,8 @@ def extract_sentences(raw_content, dataname="unknown"):
 
     # Prep paths to write
     textout = os.path.join("data", "text")
-    if not os.path.isdir(textout): os.makedirs(textout)
+    if not os.path.isdir(textout):
+        os.makedirs(textout)
 
     # Parse html with beautifulsoup
     soup = BS(raw_content, "html.parser")
@@ -111,3 +113,41 @@ def get_sentences(textblock):
                 sentence_start = i + 1
         i += 1
     return sentences
+
+
+def parse_ws_table(table):
+    """
+    Parses an html warscroll table from wahapedia and returns
+    a list where each element corresponds to a row from the original
+    table, parsed into column: value pairs.
+
+    args:
+        table (bs4.element): Beautiful Soup html table.
+
+    returns:
+        parsedtable (list[dict]): List of rows, where each element is
+                                  a dict of column name: value pairs.
+    """
+    mytable = []
+
+    for row in table.find_all("tr", class_=["wsHeaderRow", "wsDataRow"]):
+        print("\n\n------\n")
+        print(row)
+        if "wsHeaderRow" in row.attrs["class"]:
+            headers = [str(i.text).strip() for i in row.find_all("td")]
+            print("\nt1\n")
+        elif (("wsDataRow" in row.attrs["class"]) and
+              ("wsDataCell_short" not in row.attrs["class"])):
+
+            print("\nt2\n")
+            new_row = {}
+            raw_elements = row.find_all("td", class_=["wsDataCell", "wsLastDataCell"])
+
+            print(" - ".join([str(i) for i in raw_elements]))
+            for i in range(len(raw_elements)):
+                new_row[headers[i]] = str(raw_elements[i].text).strip()
+            mytable.append(new_row)
+
+        print(f"\n{mytable}\n")
+
+    return mytable
