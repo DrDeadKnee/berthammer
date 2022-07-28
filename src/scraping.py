@@ -131,23 +131,38 @@ def parse_ws_table(table):
     mytable = []
 
     for row in table.find_all("tr", class_=["wsHeaderRow", "wsDataRow"]):
-        print("\n\n------\n")
-        print(row)
         if "wsHeaderRow" in row.attrs["class"]:
             headers = [str(i.text).strip() for i in row.find_all("td")]
-            print("\nt1\n")
         elif (("wsDataRow" in row.attrs["class"]) and
               ("wsDataCell_short" not in row.attrs["class"])):
 
-            print("\nt2\n")
             new_row = {}
             raw_elements = row.find_all("td", class_=["wsDataCell", "wsLastDataCell"])
 
-            print(" - ".join([str(i) for i in raw_elements]))
             for i in range(len(raw_elements)):
                 new_row[headers[i]] = str(raw_elements[i].text).strip()
             mytable.append(new_row)
 
-        print(f"\n{mytable}\n")
-
     return mytable
+
+
+def parse_ws_profile(profile):
+    """
+    Parses the combat profile from a ws table.
+
+    args:
+        profile (bs4.element): Beautiful soup HTML element contatining battle frofile
+    returns:
+        parsed (dict): Dictionary-based encoding of combat profile.
+    """
+    elements = str(profile).split('class="redfont"')
+    parsed = {}
+
+    for i in elements:
+        sane = str(BS(i, features="lxml").text)
+        keyval = sane.replace(">", "").replace(".", "").split(":")
+
+        if len(keyval) > 1:
+            profile[keyval[0].strip()] = keyval[1].strip()
+
+    return parsed
