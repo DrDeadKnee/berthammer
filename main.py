@@ -1,4 +1,5 @@
 from src import scraping, ui
+from src.warscroll import Warscroll
 from tqdm import tqdm
 import yaml
 
@@ -45,11 +46,12 @@ class Main():
             if (i % lines == 0) and i > 0:
                 ui.keepon(f"\nany key for the next {lines} lines\n>")
 
-    def parse_ws:
-        model_name = 
-        raw_tables = ws.find_all("table")
-        raw_profile = ws.find("div", class_="ShowPitcheBattleProfile")
-        raw_abilities = ws.find_all("div", class_="BreakInsideAvoid")
+
+def parse_ws(ws):
+    model_name = "hame"
+    raw_tables = ws.find_all("table")
+    raw_profile = ws.find("div", class_="ShowPitcheBattleProfile")
+    raw_abilities = ws.find_all("div", class_="BreakInsideAvoid")
 
 
 if __name__ == "__main__":
@@ -61,9 +63,15 @@ if __name__ == "__main__":
     soup = BS(M.raw_text['sbgl_ws'], "html.parser")
     ws_list = soup.find_all("div", class_="datasheet pagebreak")
     ws = ws_list[0]
+
+    # Tables
     tables = ws.find_all("table")
     tab = tables[0]
-    df = scraping.parse_ws_table(tab)
+    df = Warscroll.parse_ws_table(tab)
 
-    profile = ws.find("div", class_="ShowPitchedBattleProfile")
-    pp = scraping.parse_ws_profile(profile)
+    # Combat Profile
+    # profile = ws.find("div", class_="ShowPitchedBattleProfile")
+    # pp = Warscroll.parse_ws_profile(profile)
+
+    # Class-Based
+    pws = Warscroll.from_html(ws)
