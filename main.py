@@ -59,7 +59,6 @@ if __name__ == "__main__":
     M.scrape_all()
 
     from bs4 import BeautifulSoup as BS
-    import pandas as pd
     soup = BS(M.raw_text['sbgl_ws'], "html.parser")
     ws_list = soup.find_all("div", class_="datasheet pagebreak")
     ws = ws_list[0]

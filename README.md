@@ -27,12 +27,12 @@ At least I'll learn something.
 ## Setup
 
 ```bash
-conda env create -f setup/berthammer_env.yml
+conda env create -f setup/berthammer_cpu.yml
 ```
 
 If you add any packages:
 
 
 ```bash
-conda env export > setup/berhammer_env.yml
+conda env export > setup/berhammer_cpu.yml
 ```

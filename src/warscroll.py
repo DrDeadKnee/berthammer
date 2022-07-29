@@ -34,7 +34,7 @@ class Warscroll(object):
         ws = Warscroll()
 
         if not isinstance(html, BSTag):
-            html = BeautifulSoup(html, "html.parser")
+            html = BS(html, "html.parser")
 
         ws.html = html
         ws.name = ws.infer_name(html)
@@ -55,6 +55,8 @@ class Warscroll(object):
         card = ws.parse_ws_card(html)
         for key in card:
             setattr(ws, key, int_it(card[key]))
+
+        ws.keywords = ws.extract_keywords(html)
 
         return ws
 
@@ -137,3 +139,17 @@ class Warscroll(object):
             "wounds": warscroll.find("div", class_="wsWounds").text,
             "bravery": warscroll.find("div", class_="wsBravery").text
         }
+
+    @staticmethod
+    def extract_keywords(warscroll):
+        """
+        Finds keywords and returns as list
+
+        args:
+            warscroll (bs4.element): Beautiful soup html element containing the full warscroll.
+        returns:
+            keywords (list[string]): List of Keywords in the warscroll.
+        """
+        kw_line = warscroll.find("td", class_="wsKeywordLine")
+        keywords = [i.strip() for i in kw_line.text.split(",")]
+        return keywords
