@@ -2,6 +2,17 @@ from bs4 import BeautifulSoup as BS
 from bs4 import Tag as BSTag
 
 
+def int_it(rawval):
+    raw_result = str(rawval).replace("+", "")
+
+    try:
+        result = int(raw_result)
+    except ValueError:
+        result = raw_result
+
+    return result
+
+
 class Warscroll(object):
 
     def __str__(self):
@@ -16,6 +27,11 @@ class Warscroll(object):
         self.battlefield_role = None
         self.base_size = None
         self.notes = None
+
+        self.movement = None
+        self.save = None
+        self.wounds = None
+        self.bravery = None
 
         self.weapon_profiles = None
         self.damage_tables = None
@@ -45,6 +61,10 @@ class Warscroll(object):
         ws.battlefield_role = profile["Battlefield Role"]
         ws.base_size = profile["Base size"]
         ws.notes = profile["Notes"]
+
+        card = ws.parse_ws_card(html)
+        for key in card:
+            setattr(ws, key, int_it(card[key]))
 
         return ws
 
@@ -110,3 +130,12 @@ class Warscroll(object):
                 parsed[keyval[0].strip()] = keyval[1].strip()
 
         return parsed
+
+    @staticmethod
+    def parse_ws_card(warscroll):
+        return {
+            "movement": warscroll.find("div", class_="wsMoveCt").text,
+            "save": warscroll.find("div", class_="wsSave").text,
+            "wounds": warscroll.find("div", class_="wsWounds").text,
+            "bravery": warscroll.find("div", class_="wsBravery").text
+        }
