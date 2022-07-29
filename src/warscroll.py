@@ -1,16 +1,6 @@
 from bs4 import BeautifulSoup as BS
 from bs4 import Tag as BSTag
-
-
-def int_it(rawval):
-    raw_result = str(rawval).replace("+", "")
-
-    try:
-        result = int(raw_result)
-    except ValueError:
-        result = raw_result
-
-    return result
+from .utils import int_it
 
 
 class Warscroll(object):
@@ -133,6 +123,14 @@ class Warscroll(object):
 
     @staticmethod
     def parse_ws_card(warscroll):
+        """
+        Parses the unit card (movement, wounds, etc.) into a dict.
+
+        args:
+            warscroll (bs4.element): beautiful soup html element containing the full warscroll.
+        returns:
+            parsed (dict): Dictionary of warscroll card (movement, save, wounds, bravery)
+        """
         return {
             "movement": warscroll.find("div", class_="wsMoveCt").text,
             "save": warscroll.find("div", class_="wsSave").text,
