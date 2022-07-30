@@ -63,14 +63,9 @@ if __name__ == "__main__":
     ws_list = soup.find_all("div", class_="datasheet pagebreak")
     ws = ws_list[0]
 
-    # Tables
-    tables = ws.find_all("table")
-    tab = tables[0]
-    df = Warscroll.parse_ws_table(tab)
-
-    # Combat Profile
-    # profile = ws.find("div", class_="ShowPitchedBattleProfile")
-    # pp = Warscroll.parse_ws_profile(profile)
-
     # Class-Based
     pws = Warscroll.from_html(ws)
+
+    for i in tqdm(ws_list):
+        ws = Warscroll.from_html(i)
+        print(ws.name)

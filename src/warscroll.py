@@ -33,19 +33,24 @@ class Warscroll(object):
 
     @classmethod
     def from_html(cls, html):
+        # Initialize Warscroll
         ws = Warscroll()
 
-        if not isinstance(html, BSTag):
-            html = BS(html, "html.parser")
-
-        ws.html = html
+        # Establish html, name, keywords
+        ws.html = BS(
+            str(html).replace('<img src="/aos3/img/asterix.png"/>', " * "),
+            "html.parser"
+        )
         ws.name = ws.infer_name(html)
+        ws.keywords = ws.extract_keywords(html)
 
+        # Loop over tables and extract info
         wstables = html.find_all("div", "wsTable")
         ws.weapon_profiles = ws.parse_ws_table(wstables[0].find("table"))
         if len(wstables) > 1:
             ws.damage_tables = ws.parse_ws_table(wstables[1].find("table"))
 
+        # Parse and store the piitched battle profile
         raw_profile = html.find("div", class_="ShowPitchedBattleProfile")
         profile = ws.parse_ws_profile(raw_profile)
         ws.unit_size = int(profile["Unit Size"])
@@ -54,15 +59,15 @@ class Warscroll(object):
         ws.base_size = profile["Base size"]
         ws.notes = profile["Notes"]
 
+        # Parse and store the top left card
         card = ws.parse_ws_card(html)
         for key in card:
             setattr(ws, key, int_it(card[key]))
 
+        # Parse and store abilities
         rules_abilities = ws.parse_text(html)
         for key in rules_abilities:
             setattr(ws, key, rules_abilities[key])
-
-        ws.keywords = ws.extract_keywords(html)
 
         return ws
 
@@ -140,7 +145,7 @@ class Warscroll(object):
             parsed (dict): Dictionary of warscroll card (movement, save, wounds, bravery)
         """
         return {
-            "movement": warscroll.find("div", class_="wsMoveCt").text,
+            "movement": warscroll.find("div", class_=["wsMoveCt", "wsMove"]).text,
             "save": warscroll.find("div", class_="wsSave").text,
             "wounds": warscroll.find("div", class_="wsWounds").text,
             "bravery": warscroll.find("div", class_="wsBravery").text

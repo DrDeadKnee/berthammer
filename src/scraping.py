@@ -40,6 +40,7 @@ def fetch_html(url, dataname="unknown"):
             .replace("</p>", " </p>")
             .replace("</td>", " </td>")
             .replace("</span>", " </span>")
+            .replace('<img src="/aos3/img/asterix.png"/>', " * ")
     )
     with open(os.path.join(rawout, dataname) + ".html", "w") as fout:
         fout.write(rawish_content)
