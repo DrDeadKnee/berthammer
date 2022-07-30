@@ -26,6 +26,8 @@ class Warscroll(object):
         self.weapon_profiles = None
         self.damage_tables = None
 
+        self.magic = None
+        self.rules = None
         self.abilities = None
         self.keywords = None
 
@@ -55,6 +57,10 @@ class Warscroll(object):
         card = ws.parse_ws_card(html)
         for key in card:
             setattr(ws, key, int_it(card[key]))
+
+        rules_abilities = ws.parse_text(html)
+        for key in rules_abilities:
+            setattr(ws, key, rules_abilities[key])
 
         ws.keywords = ws.extract_keywords(html)
 
@@ -153,3 +159,38 @@ class Warscroll(object):
         kw_line = warscroll.find("td", class_="wsKeywordLine")
         keywords = [i.strip() for i in kw_line.text.split(",")]
         return keywords
+
+    # TODO parse individual abilities
+    @staticmethod
+    def parse_text(warscroll):
+        """
+        Recursively searches some div elements containing rules and abilities of relevance to the
+        warscroll. Parses and returns a dict of the relevant sections
+        args:
+            warscroll (bs4.element): Beautiful soup html element containing the full warscroll.
+        returns:
+            rulesetc (dict): Dictionary of ability sections and the entries of each section.
+        """
+        rulesetc = {}
+
+        sections = warscroll.find_all("div", class_="wsAbilityHeader")
+        sect_text = [i.text.strip() for i in sections]
+        desc_idx = sect_text.index("DESCRIPTION")
+
+        for i in range(desc_idx, len(sections)):
+            title = sect_text[i].lower().replace(" ", "_")
+            text = []
+            n = sections[i].find_next("div", class_=["BreakInsideAvoid", "wsAbilityHeader"])
+            while (sum([(j in n.text) for j in sect_text]) == 0):
+                try:
+                    text.append(n.text)
+                    n = n.find_next("div", class_=["BreakInsideAvoid", "wsAbilityHeader"])
+                except (AttributeError, TypeError):
+                    break
+
+                if n is None:
+                    break
+
+            rulesetc[title] = text
+
+        return rulesetc
