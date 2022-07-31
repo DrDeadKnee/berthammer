@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup as BS
-from bs4 import Tag as BSTag
 from .utils import int_it
 
 
@@ -50,14 +49,17 @@ class Warscroll(object):
         if len(wstables) > 1:
             ws.damage_tables = ws.parse_ws_table(wstables[1].find("table"))
 
-        # Parse and store the piitched battle profile
+        # Parse and store the pitched battle profile
         raw_profile = html.find("div", class_="ShowPitchedBattleProfile")
         profile = ws.parse_ws_profile(raw_profile)
-        ws.unit_size = int(profile["Unit Size"])
-        ws.points = int(profile["Points"])
-        ws.battlefield_role = profile["Battlefield Role"]
-        ws.base_size = profile["Base size"]
-        ws.notes = profile["Notes"]
+        for key in profile:
+            setattr(ws, key, profile[key])
+
+        # ws.unit_size = int(profile["Unit Size"])
+        # ws.points = int(profile["Points"])
+        # ws.battlefield_role = profile["Battlefield Role"]
+        # ws.base_size = profile["Base size"]
+        # ws.notes = profile["Notes"]
 
         # Parse and store the top left card
         card = ws.parse_ws_card(html)
@@ -65,9 +67,12 @@ class Warscroll(object):
             setattr(ws, key, int_it(card[key]))
 
         # Parse and store abilities
-        rules_abilities = ws.parse_text(html)
-        for key in rules_abilities:
-            setattr(ws, key, rules_abilities[key])
+        try:
+            rules_abilities = ws.parse_text(html)
+            for key in rules_abilities:
+                setattr(ws, key, rules_abilities[key])
+        except ValueError:
+            ws.abilities = "Error"
 
         return ws
 
@@ -130,7 +135,8 @@ class Warscroll(object):
             keyval = sane.replace(">", "").replace(".", "").split(":")
 
             if len(keyval) > 1:
-                parsed[keyval[0].strip()] = keyval[1].strip()
+                key = keyval[0].strip().lower().replace(" ", "_")
+                parsed[key] = keyval[1].strip()
 
         return parsed
 
@@ -181,6 +187,7 @@ class Warscroll(object):
         sections = warscroll.find_all("div", class_="wsAbilityHeader")
         sect_text = [i.text.strip() for i in sections]
         desc_idx = sect_text.index("DESCRIPTION")
+        print(desc_idx)
 
         for i in range(desc_idx, len(sections)):
             title = sect_text[i].lower().replace(" ", "_")

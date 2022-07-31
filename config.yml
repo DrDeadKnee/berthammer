@@ -5,3 +5,5 @@ page_ids:
       url: https://wahapedia.ru/aos3/factions/soulblight-gravelords/
     - id: sbgl_ws
       url: https://wahapedia.ru/aos3/factions/soulblight-gravelords/warscrolls.html
+skip:
+    - "Nagash, Supreme Lord of the Undead"

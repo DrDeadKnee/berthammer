@@ -1,5 +1,6 @@
 from src import scraping, ui
 from src.warscroll import Warscroll
+from bs4 import BeautifulSoup as BS
 from tqdm import tqdm
 import yaml
 
@@ -13,6 +14,7 @@ class Main():
 
         self.parsed_text = {}
         self.raw_text = {}
+        self.warscrolls = {}
 
     def scrape_all(self):
         pages = self.config["page_ids"]
@@ -46,26 +48,20 @@ class Main():
             if (i % lines == 0) and i > 0:
                 ui.keepon(f"\nany key for the next {lines} lines\n>")
 
+    def load_warscrolls(self, page_id):
+        soup = BS(self.raw_text['sbgl_ws'], "html.parser")
+        ws_list = soup.find_all("div", class_="datasheet pagebreak")
+        new_ws = {}
+        self.warscrolls[page_id] = new_ws
 
-def parse_ws(ws):
-    model_name = "hame"
-    raw_tables = ws.find_all("table")
-    raw_profile = ws.find("div", class_="ShowPitcheBattleProfile")
-    raw_abilities = ws.find_all("div", class_="BreakInsideAvoid")
+        for i in tqdm(ws_list):
+            self.current = i
+            if Warscroll.infer_name(i) not in self.config["skip"]:
+                print(Warscroll.infer_name(i))
+                new_ws[Warscroll.infer_name(i)] = Warscroll.from_html(i)
 
 
 if __name__ == "__main__":
     M = Main()
     M.scrape_all()
-
-    from bs4 import BeautifulSoup as BS
-    soup = BS(M.raw_text['sbgl_ws'], "html.parser")
-    ws_list = soup.find_all("div", class_="datasheet pagebreak")
-    ws = ws_list[0]
-
-    # Class-Based
-    pws = Warscroll.from_html(ws)
-
-    for i in tqdm(ws_list):
-        ws = Warscroll.from_html(i)
-        print(ws.name)
+    M.load_warscrolls("sbgl_ws")
