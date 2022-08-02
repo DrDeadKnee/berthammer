@@ -19,8 +19,7 @@ class Main():
     def scrape_all(self):
         pages = self.config["page_ids"]
 
-        print("Scraping data...")
-        for page in tqdm(pages):
+        for page in tqdm(pages, desc="Downloading pages"):
             pageid = page["id"]
             raw_text = scraping.fetch_html(page["url"], pageid)
             self.raw_text[pageid] = raw_text
@@ -49,19 +48,11 @@ class Main():
                 ui.keepon(f"\nany key for the next {lines} lines\n>")
 
     def load_warscrolls(self, page_id):
-        soup = BS(self.raw_text['sbgl_ws'], "html.parser")
-        ws_list = soup.find_all("div", class_="datasheet pagebreak")
-        new_ws = {}
-        self.warscrolls[page_id] = new_ws
-
-        for i in tqdm(ws_list):
-            self.current = i
-            if i.find("div", class_="nails-header").text.lower().strip() == "warscroll":
-                print(Warscroll.infer_name(i))
-                new_ws[Warscroll.infer_name(i)] = Warscroll.from_html(i)
+        self.warscrolls[page_id] = scraping.ingest_warscrolls(self.raw_text[page_id])
 
 
 if __name__ == "__main__":
     M = Main()
     M.scrape_all()
     M.load_warscrolls("sbgl_ws")
+    M.load_warscrolls("sce_ws")

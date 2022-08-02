@@ -55,12 +55,6 @@ class Warscroll(object):
         for key in profile:
             setattr(ws, key, profile[key])
 
-        # ws.unit_size = int(profile["Unit Size"])
-        # ws.points = int(profile["Points"])
-        # ws.battlefield_role = profile["Battlefield Role"]
-        # ws.base_size = profile["Base size"]
-        # ws.notes = profile["Notes"]
-
         # Parse and store the top left card
         card = ws.parse_ws_card(html)
         for key in card:
@@ -187,7 +181,6 @@ class Warscroll(object):
         sections = warscroll.find_all("div", class_="wsAbilityHeader")
         sect_text = [i.text.strip() for i in sections]
         desc_idx = sect_text.index("DESCRIPTION")
-        print(desc_idx)
 
         for i in range(desc_idx, len(sections)):
             title = sect_text[i].lower().replace(" ", "_")

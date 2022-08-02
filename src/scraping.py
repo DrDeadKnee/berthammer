@@ -1,6 +1,7 @@
 import os
 import requests
 from bs4 import BeautifulSoup as BS
+from .warscroll import Warscroll
 
 
 def fetch_html(url, dataname="unknown"):
@@ -114,3 +115,28 @@ def get_sentences(textblock):
                 sentence_start = i + 1
         i += 1
     return sentences
+
+
+def ingest_warscrolls(ws_html):
+    """
+    Extracts warscrolls from wahapedia warscroll page,
+    and loads them into a name: Warscroll dictionary where
+    Warscroll is a special class containing the extracted
+    data.
+
+    args:
+        ws_html (string): A long string containing a wahapedia
+            warscroll page's html.
+    returns:
+        ws_parse (dict[string: Warscroll]): A dictionary with the
+            warscroll names pointing to a parsed Warscroll object.
+    """
+    soup = BS(ws_html, "html.parser")
+    ws_list = soup.find_all("div", class_="datasheet pagebreak")
+    ws_parsed = {}
+
+    for i in ws_list:
+        if i.find("div", class_="nails-header").text.lower().strip() == "warscroll":
+            ws_parsed[Warscroll.infer_name(i)] = Warscroll.from_html(i)
+
+    return ws_parsed
