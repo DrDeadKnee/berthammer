@@ -56,7 +56,7 @@ class Main():
 
         for i in tqdm(ws_list):
             self.current = i
-            if Warscroll.infer_name(i) not in self.config["skip"]:
+            if i.find("div", class_="nails-header").text.lower().strip() == "warscroll":
                 print(Warscroll.infer_name(i))
                 new_ws[Warscroll.infer_name(i)] = Warscroll.from_html(i)
 
