@@ -12,21 +12,29 @@ class Main():
         with open(config, "r") as fin:
             self.config = yaml.safe_load(fin)
 
-        self.parsed_text = {}
+        self.text = {}
         self.raw_text = {}
-        self.warscrolls = {}
+
+        self.warscroll = {}
+        self.raw_warscroll = {}
 
     def scrape_all(self):
-        pages = self.config["page_ids"]
+        pages = self.config["text_pages"]
+        ws_pages = self.config["warscroll_pages"]
 
-        for page in tqdm(pages, desc="Downloading pages"):
+        for page in tqdm(pages, desc="Downloading text"):
             pageid = page["id"]
             raw_text = scraping.fetch_html(page["url"], pageid)
             self.raw_text[pageid] = raw_text
             parsed_text = scraping.extract_sentences(raw_text, pageid)
-            self.parsed_text[pageid] = parsed_text
+            self.text[pageid] = parsed_text
 
-        return self.parsed_text
+        for wss in tqdm(ws_pages, desc="Downloading and parsing ws"):
+            wsid = wss["id"]
+            raw_text = scraping.fetch_html(wss["url"], wsid)
+            self.raw_warscroll[pageid] = raw_text
+            parsed_ws = scraping.ingest_warscrolls(raw_text)
+            self.warscroll[wsid] = parsed_ws
 
     def inspect(self, parsed=True, lines=10):
         if parsed:
@@ -47,12 +55,7 @@ class Main():
             if (i % lines == 0) and i > 0:
                 ui.keepon(f"\nany key for the next {lines} lines\n>")
 
-    def load_warscrolls(self, page_id):
-        self.warscrolls[page_id] = scraping.ingest_warscrolls(self.raw_text[page_id])
-
 
 if __name__ == "__main__":
     M = Main()
     M.scrape_all()
-    M.load_warscrolls("sbgl_ws")
-    M.load_warscrolls("sce_ws")
