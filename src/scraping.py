@@ -1,6 +1,7 @@
 import os
 import requests
 from bs4 import BeautifulSoup as BS
+from .warscroll import Warscroll
 
 
 def fetch_html(url, dataname="unknown"):
@@ -11,7 +12,7 @@ def fetch_html(url, dataname="unknown"):
 
     args:
         url (string):       The site to scrape. This code assumes
-                            a standard 2-column wahapedia page.
+                            a standard 3-column wahapedia page.
         dataname (string):  A short string representing the desired
                             output name. Files with that name will be
                             stored under the data directory.
@@ -21,7 +22,8 @@ def fetch_html(url, dataname="unknown"):
     """
     # Prep paths to write
     rawout = os.path.join("data", "raw")
-    if not os.path.isdir(rawout): os.makedirs(rawout)
+    if not os.path.isdir(rawout):
+        os.makedirs(rawout)
 
     # Scrape and minimaly reformat
     raw_content = requests.get(url).text
@@ -39,6 +41,7 @@ def fetch_html(url, dataname="unknown"):
             .replace("</p>", " </p>")
             .replace("</td>", " </td>")
             .replace("</span>", " </span>")
+            .replace('<img src="/aos3/img/asterix.png"/>', " * ")
     )
     with open(os.path.join(rawout, dataname) + ".html", "w") as fout:
         fout.write(rawish_content)
@@ -66,7 +69,8 @@ def extract_sentences(raw_content, dataname="unknown"):
 
     # Prep paths to write
     textout = os.path.join("data", "text")
-    if not os.path.isdir(textout): os.makedirs(textout)
+    if not os.path.isdir(textout):
+        os.makedirs(textout)
 
     # Parse html with beautifulsoup
     soup = BS(raw_content, "html.parser")
@@ -111,3 +115,28 @@ def get_sentences(textblock):
                 sentence_start = i + 1
         i += 1
     return sentences
+
+
+def ingest_warscrolls(ws_html):
+    """
+    Extracts warscrolls from wahapedia warscroll page,
+    and loads them into a name: Warscroll dictionary where
+    Warscroll is a special class containing the extracted
+    data.
+
+    args:
+        ws_html (string): A long string containing a wahapedia
+            warscroll page's html.
+    returns:
+        ws_parse (dict[string: Warscroll]): A dictionary with the
+            warscroll names pointing to a parsed Warscroll object.
+    """
+    soup = BS(ws_html, "html.parser")
+    ws_list = soup.find_all("div", class_="datasheet pagebreak")
+    ws_parsed = {}
+
+    for i in ws_list:
+        if i.find("div", class_="nails-header").text.lower().strip() == "warscroll":
+            ws_parsed[Warscroll.infer_name(i)] = Warscroll.from_html(i)
+
+    return ws_parsed

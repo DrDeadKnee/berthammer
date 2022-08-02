@@ -1,7 +1,13 @@
-page_ids:
+text_pages:
     - id: core
       url: https://wahapedia.ru/aos3/the-rules/the-core-rules/ 
     - id: sbgl
       url: https://wahapedia.ru/aos3/factions/soulblight-gravelords/
-    - id: sbgl_ws
+    - id: sce
+      url: https://wahapedia.ru/aos3/factions/stormcast-eternals/
+
+warscroll_pages:
+    - id: sbgl
       url: https://wahapedia.ru/aos3/factions/soulblight-gravelords/warscrolls.html
+    - id: sce
+      url: https://wahapedia.ru/aos3/factions/stormcast-eternals/warscrolls.html

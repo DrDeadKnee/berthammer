@@ -11,12 +11,16 @@ dependencies:
   - cffi=1.15.0=py38hd667e15_1
   - charset-normalizer=2.0.4=pyhd3eb1b0_0
   - cryptography=37.0.1=py38h9ce1e76_0
+  - icu=58.2=he6710b0_3
   - idna=3.3=pyhd3eb1b0_0
   - ld_impl_linux-64=2.38=h1181459_1
   - libffi=3.3=he6710b0_2
   - libgcc-ng=11.2.0=h1234567_1
   - libgomp=11.2.0=h1234567_1
   - libstdcxx-ng=11.2.0=h1234567_1
+  - libxml2=2.9.14=h74e7548_0
+  - libxslt=1.1.35=h4e12654_0
+  - lxml=4.9.1=py38h1edc446_0
   - ncurses=6.3=h5eee18b_3
   - openssl=1.1.1q=h7f8727e_0
   - pip=22.1.2=py38h06a4308_0
