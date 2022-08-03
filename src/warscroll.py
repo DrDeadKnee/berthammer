@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup as BS
-from .utils import int_it
-import os
+from .utils import int_it, prettify_text
 
 
 class Warscroll(object):
@@ -88,42 +87,11 @@ class Warscroll(object):
                     out += str(row[key]).ljust(pads[idx])
 
         # Text abilities
-        if self.magic is not None:
-            out += "\n\nMagic:"
-            out += "\n".join([self._prettify_text(i) for i in self.magic])
-
         for section in self.text_abilities:
             out += "\n\n{}:".format(section.title())
-            out += "\n".join([self._prettify_text(i) for i in getattr(self, section)])
+            out += prettify_text(getattr(self, section))
 
-        # Rules
-        # Abilities
-        # Kewords
-
-        # Deal with options
-        if show:
-            print(out)
-
-        if output:
-            return out
-
-    def _prettify_text(self, string, prefix="\n\t"):
-        """
-        Returns version of text which fits terminal width.
-        """
-        out = ""
-        depth, width = os.popen("stty size", "r").read().split()
-        width = int(width)
-        if "\t" in prefix:
-            width -= 8
-        width += len(prefix.replace("\t", "").replace("\n", ""))
-
-        strs = [string[i: i + width] for i in range(0, len(string), width)]
-
-        for i in strs:
-            out += f"{prefix}{i}"
-
-        return out
+        print(out)
 
     @classmethod
     def from_html(cls, html):
@@ -335,32 +303,22 @@ class Warscroll(object):
             rulesetc (dict): Dictionary of ability sections and the entries of each section.
         """
         rulesetc = {}
-
-        sections = warscroll.find_all("div", class_="wsAbilityHeader")
-        sect_text = [i.text.strip() for i in sections]
-        desc_idx = sect_text.index("DESCRIPTION")
-
-        for i in range(desc_idx, len(sections)):
-            title = sect_text[i].lower().replace(" ", "_")
-            text = []
-            n = sections[i].find_next("div", class_=["BreakInsideAvoid", "wsAbilityHeader"])
-            while (sum([(j in n.text) for j in sect_text]) == 0):
-                try:
-                    cleanedish = (
-                        n.text
-                         .replace("   ", " ")
-                         .replace("  ", " ")
-                         .replace(" .", ".")
-                         .replace(" ,", ",")
-                    )
-                    text.append(cleanedish)
-                    n = n.find_next("div", class_=["BreakInsideAvoid", "wsAbilityHeader"])
-                except (AttributeError, TypeError):
-                    break
-
-                if n is None:
-                    break
-
-            rulesetc[title] = text
+        cols = warscroll.find("div", class_="Columns.3_NoRule")
+        for sec in warscroll.find_all("div", class_="BreakInsideAvoid"):
+            if "ShowPitchedBattle" not in sec.get("class"):
+                title = (
+                    sec.find_next("span", class_="redfont")
+                       .text
+                       .strip()
+                       .replace(" ", "_")
+                       .lower()
+                )
+                text = (
+                    sec.text.replace("   ", " ")
+                            .replace("  ", " ")
+                            .replace(" .", ".")
+                            .replace(" ,", ",")
+                )
+                rulesetc[title] = text
 
         return rulesetc
