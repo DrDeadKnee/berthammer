@@ -59,3 +59,7 @@ class Main():
 if __name__ == "__main__":
     M = Main()
     M.scrape_all()
+    k = M.warscroll["sce"]["Knight-Draconis"]
+    v = M.warscroll["sbgl"]["Vampire Lord on Zombie Dragon"]
+    k.display()
+    v.display()

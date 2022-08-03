@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup as BS
 from .utils import int_it
+import os
 
 
 class Warscroll(object):
@@ -10,6 +11,7 @@ class Warscroll(object):
     def __init__(self):
         self.html = None
         self.name = None
+        self.keywords = None
 
         self.unit_size = None
         self.points = None
@@ -23,12 +25,105 @@ class Warscroll(object):
         self.bravery = None
 
         self.weapon_profiles = None
+        self.raw_weaps = None
         self.damage_tables = None
 
+        self.text_abilities = []
         self.magic = None
         self.rules = None
         self.abilities = None
-        self.keywords = None
+
+    def display(self, output=False, show=True):
+        """
+        Print warscroll in human-readable form
+
+        args:
+            output (bool): Returns string that was built if true
+            show (bool): Prints string that was built if true
+        """
+        # Name
+        out = f"\n\n\n----\t----\t{self.name}\t----\t----\n"
+
+        # Pitched battle profile
+        out += f"\nProfile: \n\tpoints: {self.points} | "
+        out += f"roles: {self.battlefield_role} | "
+        out += f"base size: {self.base_size}"
+        out += f"\n\tnotes: {self.notes}"
+
+        # Card
+        out += f"\n\nCard: \n\tmove: {self.movement}"
+        out += f"\n\tsave: {self.save}"
+        out += f"\n\twounds: {self.wounds}"
+        out += f"\n\tbravery: {self.bravery}"
+
+        # Weapon Tables Pretty Printing
+        out += "\n\nWeapon Profiles:\n\t"
+        basekeys = list(self.weapon_profiles[0].keys())
+        pads = [
+            max(
+                [len("weapon_name")] +
+                [len(i["weapon_name"]) for i in self.weapon_profiles]
+            ) + 2
+        ]
+        pads += [len(i) + 2 for i in basekeys[1:]]
+
+        for idx, key in enumerate(self.weapon_profiles[0].keys()):
+            out += "\033[4m" + key.ljust(pads[idx]) + "\033[0m"
+
+        for weapon in self.weapon_profiles:
+            out += "\n\t"
+            for idx, key in enumerate(weapon):
+                out += str(weapon[key]).ljust(pads[idx])
+
+        # Damage tables pretty printing
+        if self.damage_tables is not None:
+            out += "\n\nDamage Tables:\n\t"
+            pads = [len(i) + 2 for i in self.damage_tables[0].keys()]
+            for idx, key in enumerate(self.damage_tables[0].keys()):
+                out += "\033[4m" + key.ljust(pads[idx]) + "\033[0m"
+
+            for row in self.damage_tables:
+                out += "\n\t"
+                for idx, key in enumerate(row):
+                    out += str(row[key]).ljust(pads[idx])
+
+        # Text abilities
+        if self.magic is not None:
+            out += "\n\nMagic:"
+            out += "\n".join([self._prettify_text(i) for i in self.magic])
+
+        for section in self.text_abilities:
+            out += "\n\n{}:".format(section.title())
+            out += "\n".join([self._prettify_text(i) for i in getattr(self, section)])
+
+        # Rules
+        # Abilities
+        # Kewords
+
+        # Deal with options
+        if show:
+            print(out)
+
+        if output:
+            return out
+
+    def _prettify_text(self, string, prefix="\n\t"):
+        """
+        Returns version of text which fits terminal width.
+        """
+        out = ""
+        depth, width = os.popen("stty size", "r").read().split()
+        width = int(width)
+        if "\t" in prefix:
+            width -= 8
+        width += len(prefix.replace("\t", "").replace("\n", ""))
+
+        strs = [string[i: i + width] for i in range(0, len(string), width)]
+
+        for i in strs:
+            out += f"{prefix}{i}"
+
+        return out
 
     @classmethod
     def from_html(cls, html):
@@ -45,7 +140,10 @@ class Warscroll(object):
 
         # Loop over tables and extract info
         wstables = html.find_all("div", "wsTable")
-        ws.weapon_profiles = ws.parse_ws_table(wstables[0].find("table"))
+        weapon_profiles = ws.parse_ws_table(wstables[0].find("table"))
+        ws.raw_weaps = weapon_profiles
+        ws.weapon_profiles = ws.cleanup_weapon_profiles(weapon_profiles)
+
         if len(wstables) > 1:
             ws.damage_tables = ws.parse_ws_table(wstables[1].find("table"))
 
@@ -64,6 +162,7 @@ class Warscroll(object):
         try:
             rules_abilities = ws.parse_text(html)
             for key in rules_abilities:
+                ws.text_abilities.append(key)
                 setattr(ws, key, rules_abilities[key])
         except ValueError:
             ws.abilities = "Error"
@@ -76,6 +175,14 @@ class Warscroll(object):
 
     @staticmethod
     def infer_name(html):
+        """
+        Infers unit name from bs4 element containing a wahapedia warscroll.
+
+        args:
+            html (bs4.element): Beautiful soup warscroll
+        returns:
+            name (string): Name from warscroll
+        """
         raw_name = html.find("h3", class_="wsHeader")
         name = str(raw_name.text).replace(".", "").strip()
         return name
@@ -112,6 +219,54 @@ class Warscroll(object):
         return mytable
 
     @staticmethod
+    def cleanup_weapon_profiles(weapon_profiles):
+        """
+        Cleans up weapon profiles for easy insertion into tables
+        """
+        new_profiles = []
+
+        for profile in weapon_profiles:
+            # Parse key categories
+            if "MELEE WEAPONS" in profile:
+                profile["weapon_name"] = profile["MELEE WEAPONS"]
+                profile["attack_type"] = "melee"
+                del profile["MELEE WEAPONS"]
+            elif "MISSILE WEAPONS" in profile:
+                profile["weapon_name"] = profile["MISSILE WEAPONS"]
+                profile["attack_type"] = "missile"
+                del profile["MISSILE WEAPONS"]
+
+            # Rename keys
+            new_keys = [
+                i.strip().lower()
+                 .replace("to wound to wnd", "to_wound")
+                 .replace("damage dmg", "damage")
+                 .replace(" ", "_")
+                for i in profile
+            ]
+
+            # Pair keys with values and re-order, replace strings with ints
+            temp_dict = dict(zip(new_keys, profile.values()))
+            ordered = {
+                "weapon_name": temp_dict["weapon_name"],
+                "attack_type": temp_dict["attack_type"]
+            }
+            maybekeys = ["range", "attacks", "to_hit", "to_wound", "rend", "damage"]
+            for i in maybekeys:
+                if i in temp_dict:
+                    val = str(temp_dict[i]).replace('"', "").replace("+", "")
+                    try:
+                        ordered[i] = int(val)
+                    except ValueError:
+                        ordered[i] = None
+                else:
+                    ordered[i] = None
+
+            new_profiles.append(ordered)
+
+        return new_profiles
+
+    @staticmethod
     def parse_ws_profile(profile):
         """
         Parses the combat profile from a ws table.
@@ -140,7 +295,8 @@ class Warscroll(object):
         Parses the unit card (movement, wounds, etc.) into a dict.
 
         args:
-            warscroll (bs4.element): beautiful soup html element containing the full warscroll.
+            warscroll (bs4.element): beautiful soup html element containing
+            the full warscroll.
         returns:
             parsed (dict): Dictionary of warscroll card (movement, save, wounds, bravery)
         """
@@ -157,7 +313,8 @@ class Warscroll(object):
         Finds keywords and returns as list
 
         args:
-            warscroll (bs4.element): Beautiful soup html element containing the full warscroll.
+            warscroll (bs4.element): Beautiful soup html element containing the
+            full warscroll.
         returns:
             keywords (list[string]): List of Keywords in the warscroll.
         """
@@ -169,10 +326,11 @@ class Warscroll(object):
     @staticmethod
     def parse_text(warscroll):
         """
-        Recursively searches some div elements containing rules and abilities of relevance to the
-        warscroll. Parses and returns a dict of the relevant sections
+        Recursively searches some div elements containing rules and abilities of
+        relevance to the warscroll. Parses and returns a dict of the relevant sections
         args:
-            warscroll (bs4.element): Beautiful soup html element containing the full warscroll.
+            warscroll (bs4.element): Beautiful soup html element containing the
+                                     full warscroll.
         returns:
             rulesetc (dict): Dictionary of ability sections and the entries of each section.
         """
@@ -188,7 +346,14 @@ class Warscroll(object):
             n = sections[i].find_next("div", class_=["BreakInsideAvoid", "wsAbilityHeader"])
             while (sum([(j in n.text) for j in sect_text]) == 0):
                 try:
-                    text.append(n.text)
+                    cleanedish = (
+                        n.text
+                         .replace("   ", " ")
+                         .replace("  ", " ")
+                         .replace(" .", ".")
+                         .replace(" ,", ",")
+                    )
+                    text.append(cleanedish)
                     n = n.find_next("div", class_=["BreakInsideAvoid", "wsAbilityHeader"])
                 except (AttributeError, TypeError):
                     break
