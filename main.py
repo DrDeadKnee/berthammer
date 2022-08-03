@@ -24,13 +24,24 @@ class Main():
 
         for page in tqdm(pages, desc="Downloading text"):
             pageid = page["id"]
-            raw_text = scraping.fetch_html(page["url"], pageid)
+            raw_text = scraping.fetch_html(
+                page["url"],
+                pageid,
+                cache_fetched=self.config["cache_fetched"],
+                use_cached=self.config["use_cached"]
+            )
             self.raw_text[pageid] = raw_text
             parsed_text = scraping.extract_sentences(raw_text, pageid)
             self.text[pageid] = parsed_text
 
         for wss in tqdm(ws_pages, desc="Downloading and parsing ws"):
             wsid = wss["id"]
+            raw_text = scraping.fetch_html(
+                wss["url"],
+                wsid,
+                cache_fetched=self.config["cache_fetched"],
+                use_cached=self.config["use_cached"]
+            )
             raw_text = scraping.fetch_html(wss["url"], wsid)
             self.raw_warscroll[pageid] = raw_text
             parsed_ws = scraping.ingest_warscrolls(raw_text)

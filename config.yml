@@ -1,3 +1,6 @@
+use_cached: True
+cache_fetched: True
+
 text_pages:
     - id: core
       url: https://wahapedia.ru/aos3/the-rules/the-core-rules/ 

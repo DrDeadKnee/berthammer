@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup as BS
 from .warscroll import Warscroll
 
 
-def fetch_html(url, dataname="unknown"):
+def fetch_html(url, dataname="unknown", cache_fetched=True, use_cached=True):
     """
     Function to fetch and store html as 'raw' data, although
     some string replacement is done beforehand to allow bs4 text
@@ -16,36 +16,53 @@ def fetch_html(url, dataname="unknown"):
         dataname (string):  A short string representing the desired
                             output name. Files with that name will be
                             stored under the data directory.
+        cache_fetched (bool): If true, will cache any new data that was
+                              downloaded
+        use_cached (bool): If true, will load any data on disk matching
+                           a path determined by dataname if available,
+                           rather than fetching remotely.
 
     returns:
         raw_content (string): Long string of minimally processed html
     """
+    # State variables
+    new_bolus = False
+
     # Prep paths to write
     rawout = os.path.join("data", "raw")
+    filename = os.path.join(rawout, dataname) + ".html"
     if not os.path.isdir(rawout):
         os.makedirs(rawout)
 
+    # Load locally if appropriate
+    if use_cached and os.path.exists(filename):
+        rawish_content = open(filename).read()
+
     # Scrape and minimaly reformat
-    raw_content = requests.get(url).text
-    rawish_content = (
-        raw_content
-            .replace("</h1>", ". </h1>")
-            .replace("</h2>", ". </h2>")
-            .replace("</h3>", ". </h3>")
-            .replace("</h4>", ". </h4>")
-            .replace("</a>", " </a>")
-            .replace("</b>", " </b>")
-            .replace("<br>", ". <br>")
-            .replace("</div>", " </div>")
-            .replace("</li>", " </li>")
-            .replace("</p>", " </p>")
-            .replace("</td>", " </td>")
-            .replace("</span>", " </span>")
-            .replace('<img src="/aos3/img/asterix.png"/>', " * ")
-    )
-    with open(os.path.join(rawout, dataname) + ".html", "w") as fout:
-        fout.write(rawish_content)
-    fout.close()
+    else:
+        new_bolus = True
+        raw_content = requests.get(url).text
+        rawish_content = (
+            raw_content
+                .replace("</h1>", ". </h1>")
+                .replace("</h2>", ". </h2>")
+                .replace("</h3>", ". </h3>")
+                .replace("</h4>", ". </h4>")
+                .replace("</a>", " </a>")
+                .replace("</b>", " </b>")
+                .replace("<br>", ". <br>")
+                .replace("</div>", " </div>")
+                .replace("</li>", " </li>")
+                .replace("</p>", " </p>")
+                .replace("</td>", " </td>")
+                .replace("</span>", " </span>")
+                .replace('<img src="/aos3/img/asterix.png"/>', " * ")
+        )
+
+    if cache_fetched and new_bolus:
+        with open(filename, "w") as fout:
+            fout.write(rawish_content)
+        fout.close()
 
     return rawish_content
 
