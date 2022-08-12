@@ -1,13 +1,56 @@
-text_pages:
+use_cached: True
+cache_fetched: True
+
+universal_pages:
     - id: core
       url: https://wahapedia.ru/aos3/the-rules/the-core-rules/ 
-    - id: sbgl
-      url: https://wahapedia.ru/aos3/factions/soulblight-gravelords/
+
+faction_pages:
+    - id: cos
+      url: https://wahapedia.ru/aos3/factions/cities-of-sigmar/
+    - id: dok
+      url: https://wahapedia.ru/aos3/factions/daughters-of-khaine/
+    - id: fyreslayers
+      url: https://wahapedia.ru/aos3/factions/fyreslayers/
+    - id: deepkin
+      url: https://wahapedia.ru/aos3/factions/idoneth-deepkin/
+    - id: ko
+      url: https://wahapedia.ru/aos3/factions/kharadron-overlords/
+    - id: lumineth
+      url: https://wahapedia.ru/aos3/factions/lumineth-realm-lords/
+    - id: seraphon
+      url: https://wahapedia.ru/aos3/factions/seraphon/
     - id: sce
       url: https://wahapedia.ru/aos3/factions/stormcast-eternals/
-
-warscroll_pages:
+    - id: sylvaneth
+      url: https://wahapedia.ru/aos3/factions/sylvaneth/
+    - id: beasts
+      url: https://wahapedia.ru/aos3/factions/beasts-of-chaos/
+    - id: khorne
+      url: https://wahapedia.ru/aos3/factions/blades-of-khorne/
+    - id: tzeentch
+      url: https://wahapedia.ru/aos3/factions/disciples-of-tzeentch/
+    - id: slaanesh
+      url: https://wahapedia.ru/aos3/factions/hedonites-of-slaanesh/
+    - id: nurgle
+      url: https://wahapedia.ru/aos3/factions/maggotkin-of-nurgle/
+    - id: skaven
+      url: https://wahapedia.ru/aos3/factions/skaven/
+    - id: std
+      url: https://wahapedia.ru/aos3/factions/slaves-to-darkness/
+    - id: fec
+      url: https://wahapedia.ru/aos3/factions/flesh-eater-courts/
+    - id: nighthaunt
+      url: https://wahapedia.ru/aos3/factions/nighthaunt/
+    - id: osb
+      url: https://wahapedia.ru/aos3/factions/ossiarch-bonereapers/
     - id: sbgl
-      url: https://wahapedia.ru/aos3/factions/soulblight-gravelords/warscrolls.html
-    - id: sce
-      url: https://wahapedia.ru/aos3/factions/stormcast-eternals/warscrolls.html
+      url: https://wahapedia.ru/aos3/factions/soulblight-gravelords/
+    - id: gitz
+      url: https://wahapedia.ru/aos3/factions/gloomspite-gitz/
+    - id: ogors
+      url: https://wahapedia.ru/aos3/factions/ogor-mawtribes/
+    - id: orcs
+      url: https://wahapedia.ru/aos3/factions/orruk-warclans/
+    - id: sob
+      url: https://wahapedia.ru/aos3/factions/sons-of-behemat/

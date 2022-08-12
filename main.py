@@ -19,18 +19,30 @@ class Main():
         self.raw_warscroll = {}
 
     def scrape_all(self):
-        pages = self.config["text_pages"]
-        ws_pages = self.config["warscroll_pages"]
+        faction_pages = self.config["faction_pages"]
+        pages = faction_pages + self.config["universal_pages"]
 
         for page in tqdm(pages, desc="Downloading text"):
             pageid = page["id"]
-            raw_text = scraping.fetch_html(page["url"], pageid)
+            raw_text = scraping.fetch_html(
+                page["url"],
+                pageid,
+                cache_fetched=self.config["cache_fetched"],
+                use_cached=self.config["use_cached"]
+            )
             self.raw_text[pageid] = raw_text
             parsed_text = scraping.extract_sentences(raw_text, pageid)
             self.text[pageid] = parsed_text
 
-        for wss in tqdm(ws_pages, desc="Downloading and parsing ws"):
-            wsid = wss["id"]
+        for wss in tqdm(faction_pages, desc="Downloading and parsing ws"):
+            wsid = wss["id"] + "_ws"
+            wsurl = wss["url"] + "warscrolls.html"
+            raw_text = scraping.fetch_html(
+                wsurl,
+                wsid,
+                cache_fetched=self.config["cache_fetched"],
+                use_cached=self.config["use_cached"]
+            )
             raw_text = scraping.fetch_html(wss["url"], wsid)
             self.raw_warscroll[pageid] = raw_text
             parsed_ws = scraping.ingest_warscrolls(raw_text)
@@ -59,3 +71,9 @@ class Main():
 if __name__ == "__main__":
     M = Main()
     M.scrape_all()
+    k = M.warscroll["sce_ws"]["Knight-Draconis"]
+    v = M.warscroll["sbgl_ws"]["Vampire Lord on Zombie Dragon"]
+    a = M.warscroll["std_ws"]["Archaon the Everchosen"]
+    k.display()
+    v.display()
+    a.display()
