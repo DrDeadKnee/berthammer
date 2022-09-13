@@ -73,6 +73,7 @@ if __name__ == "__main__":
     M.scrape_all()
     k = M.warscroll["sce_ws"]["Knight-Draconis"]
     v = M.warscroll["sbgl_ws"]["Vampire Lord on Zombie Dragon"]
+    v = M.warscroll["sbgl_ws"]["Blood Knights"]
     a = M.warscroll["std_ws"]["Archaon the Everchosen"]
     k.display()
     v.display()
