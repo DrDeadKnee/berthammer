@@ -8,49 +8,79 @@ universal_pages:
 faction_pages:
     - id: cos
       url: https://wahapedia.ru/aos3/factions/cities-of-sigmar/
+      ga: order
     - id: dok
       url: https://wahapedia.ru/aos3/factions/daughters-of-khaine/
+      ga: order
     - id: fyreslayers
       url: https://wahapedia.ru/aos3/factions/fyreslayers/
+      ga: order
     - id: deepkin
       url: https://wahapedia.ru/aos3/factions/idoneth-deepkin/
+      ga: order
     - id: ko
       url: https://wahapedia.ru/aos3/factions/kharadron-overlords/
+      ga: order
     - id: lumineth
       url: https://wahapedia.ru/aos3/factions/lumineth-realm-lords/
+      ga: order
     - id: seraphon
       url: https://wahapedia.ru/aos3/factions/seraphon/
+      ga: order
     - id: sce
       url: https://wahapedia.ru/aos3/factions/stormcast-eternals/
+      ga: order
     - id: sylvaneth
       url: https://wahapedia.ru/aos3/factions/sylvaneth/
+      ga: order
     - id: beasts
       url: https://wahapedia.ru/aos3/factions/beasts-of-chaos/
+      ga: chaos
     - id: khorne
       url: https://wahapedia.ru/aos3/factions/blades-of-khorne/
+      ga: chaos
     - id: tzeentch
       url: https://wahapedia.ru/aos3/factions/disciples-of-tzeentch/
+      ga: chaos
     - id: slaanesh
       url: https://wahapedia.ru/aos3/factions/hedonites-of-slaanesh/
+      ga: chaos
     - id: nurgle
       url: https://wahapedia.ru/aos3/factions/maggotkin-of-nurgle/
+      ga: chaos
     - id: skaven
       url: https://wahapedia.ru/aos3/factions/skaven/
+      ga: chaos
     - id: std
       url: https://wahapedia.ru/aos3/factions/slaves-to-darkness/
+      ga: chaos
     - id: fec
       url: https://wahapedia.ru/aos3/factions/flesh-eater-courts/
+      ga: death 
     - id: nighthaunt
       url: https://wahapedia.ru/aos3/factions/nighthaunt/
+      ga: death 
     - id: osb
       url: https://wahapedia.ru/aos3/factions/ossiarch-bonereapers/
+      ga: death 
     - id: sbgl
       url: https://wahapedia.ru/aos3/factions/soulblight-gravelords/
+      ga: death 
     - id: gitz
       url: https://wahapedia.ru/aos3/factions/gloomspite-gitz/
+      ga: destruction
     - id: ogors
       url: https://wahapedia.ru/aos3/factions/ogor-mawtribes/
+      ga: destruction
     - id: orcs
       url: https://wahapedia.ru/aos3/factions/orruk-warclans/
+      ga: destruction
     - id: sob
       url: https://wahapedia.ru/aos3/factions/sons-of-behemat/
+      ga: destruction
+
+table:
+    unit: "data/tables/unit.parquet"
+    weaprof: "data/tables/weaprof.parquet"
+    damage: "data/tables/damage.parquet"
+    ability: "data/tables/ability.parquet"

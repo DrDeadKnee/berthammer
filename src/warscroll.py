@@ -8,6 +8,9 @@ class Warscroll(object):
         return self.name
 
     def __init__(self):
+        self.faction = None
+        self.grand_alliance = None
+
         self.html = None
         self.name = None
         self.keywords = None
@@ -94,15 +97,17 @@ class Warscroll(object):
         print(out)
 
     @classmethod
-    def from_html(cls, html):
+    def from_html(cls, html, faction=None, grand_alliance=None):
         # Initialize Warscroll
         ws = Warscroll()
 
-        # Establish html, name, keywords
+        # Establish html, faction name, keywords
         ws.html = BS(
             str(html).replace('<img src="/aos3/img/asterix.png"/>', " * "),
             "html.parser"
         )
+        ws.faction = faction
+        ws.grand_alliance = grand_alliance
         ws.name = ws.infer_name(html)
         ws.keywords = ws.extract_keywords(html)
 

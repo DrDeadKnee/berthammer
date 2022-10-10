@@ -45,7 +45,7 @@ class Main():
             )
             raw_text = scraping.fetch_html(wss["url"], wsid)
             self.raw_warscroll[pageid] = raw_text
-            parsed_ws = scraping.ingest_warscrolls(raw_text)
+            parsed_ws = scraping.ingest_warscrolls(raw_text, wss["id"], wss["ga"])
             self.warscroll[wsid] = parsed_ws
 
     def inspect(self, parsed=True, lines=10):

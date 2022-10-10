@@ -134,7 +134,7 @@ def get_sentences(textblock):
     return sentences
 
 
-def ingest_warscrolls(ws_html):
+def ingest_warscrolls(ws_html, faction, grand_alliance):
     """
     Extracts warscrolls from wahapedia warscroll page,
     and loads them into a name: Warscroll dictionary where
@@ -154,6 +154,6 @@ def ingest_warscrolls(ws_html):
 
     for i in ws_list:
         if i.find("div", class_="nails-header").text.lower().strip() == "warscroll":
-            ws_parsed[Warscroll.infer_name(i)] = Warscroll.from_html(i)
+            ws_parsed[Warscroll.infer_name(i)] = Warscroll.from_html(i, faction, grand_alliance)
 
     return ws_parsed
